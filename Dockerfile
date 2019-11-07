@@ -1,12 +1,43 @@
-FROM	centos/devtoolset-6-toolchain-centos7:latest
+FROM	centos:7
 
 ENV	SSH_AUTH_SOCK=/tmp/ssh-agent
 
 # Install toolchain and cmake
 USER	0
+RUN 	yum update -y
+RUN	yum groupinstall -y "Development Tools"
 RUN	yum install -y \
+		wget \
+		zlib-devel \
 		make \
 		cmake
+
+# Get Python 3.6.6
+RUN 	cd /opt && \
+	wget https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tar.xz && \
+	tar -xJf Python-3.6.6.tar.xz && \
+	rm /opt/Python-3.6.6.tar.xz
+
+RUN	cd /opt/Python-3.6.6 && \
+	./configure && \
+	make && \
+	make install
+
+RUN	rm -r /opt/Python-3.6.6
+
+# Get GCC 9.2.0
+RUN 	cd /opt && \
+	wget http://ftp.mirrorservice.org/sites/sourceware.org/pub/gcc/releases/gcc-9.2.0/gcc-9.2.0.tar.gz && \
+	tar zxf gcc-9.2.0.tar.gz && \
+	rm /opt/gcc-9.2.0.tar.gz
+
+RUN	cd /opt/gcc-9.2.0 && \
+ 	./contrib/download_prerequisites && \
+	./configure --disable-multilib --enable-languages=c,c++ && \
+	make -j 4 && \
+	make install
+
+RUN	rm -r /opt/gcc-9.2.0
 
 # Entrypoint
 COPY	entrypoint.sh /usr/local/bin/entrypoint.sh
