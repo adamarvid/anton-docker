@@ -1,6 +1,7 @@
 FROM	centos:7
 
 ENV	SSH_AUTH_SOCK=/tmp/ssh-agent
+ENV 	TERM=xterm-256color
 
 # Install toolchain and cmake
 USER	0
@@ -9,8 +10,7 @@ RUN	yum groupinstall -y "Development Tools"
 RUN	yum install -y \
 		wget \
 		zlib-devel \
-		make \
-		cmake
+		make
 
 # Get Python 3.6.6
 RUN 	cd /opt && \
@@ -38,6 +38,11 @@ RUN	cd /opt/gcc-9.2.0 && \
 	make install
 
 RUN	rm -r /opt/gcc-9.2.0
+
+# Get CMake3
+RUN	yum install -y http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm
+RUN	yum install -y cmake3
+RUN	ln -s /usr/bin/cmake3 /usr/bin/cmake
 
 # Entrypoint
 COPY	entrypoint.sh /usr/local/bin/entrypoint.sh
